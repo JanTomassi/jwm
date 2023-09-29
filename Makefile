@@ -22,6 +22,10 @@ dwm: ${OBJ}
 clean:
 	rm -f dwm ${OBJ} dwm-${VERSION}.tar.gz
 
+ctags:
+	ctags -e -R . $(shell echo '${INCS}' | sed "s/-I//g" | sed "s/-pthread/\/usr\/include\/pthread.h/")
+
+
 dist: clean
 	mkdir -p dwm-${VERSION}
 	cp -R LICENSE Makefile README config.def.h config.mk\

@@ -98,7 +98,7 @@ def unlock_if_near():
     subprocess.run(["pkill", "i3lock"])
 
 
-def manage_bluetooth_locking():
+def manage_bluetooth_locking() -> str:
     global is_locking
 
     is_device = get_bluetooth_device()
@@ -107,14 +107,16 @@ def manage_bluetooth_locking():
         is_locking = 0
         return " 󰄜"
 
-    elif not (is_device) and (is_locking == 2):
+    elif not (is_device) and (is_locking == 4):
         is_locking += 1
         lock_if_no_dev()
         return " 󰥐"
 
-    elif not (is_device) and (is_locking <= 2):
+    elif not (is_device) and (is_locking >= 2) and (is_locking < 4):
         is_locking += 1
         subprocess.run(["notify-send", "Phone not found for %d" % is_locking])
+        return " 󰥐"
+    else:
         return " 󰥐"
 
 def update_root_window():
@@ -124,7 +126,9 @@ def update_root_window():
 
 
 def run_module():
-    run_on_interval(15, manage_bluetooth_locking, str_module)
+    global str_module
+
+    run_on_interval(60, manage_bluetooth_locking, str_module)
     run_on_interval(1, get_network, str_module)
     run_on_interval(60 * 10, get_free_space, str_module)
     run_on_interval(60 * 60, get_package_update, str_module)

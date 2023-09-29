@@ -4,8 +4,8 @@
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
-static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "FiraCode Nerd Font Mono:style=Regular:antialias=true:autohint=true:size=10" };
+static const int topbar             = 0;        /* 0 means bottom bar */
+static const char *fonts[]          = { "FiraMono Nerd Font:size=8" };
 static const char dmenufont[]       = "monospace:size=10";
 static unsigned int baralpha        = 0xff;
 static unsigned int borderalpha     = 0xff;
@@ -62,7 +62,7 @@ static const Layout layouts[] = {
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 // static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 static const char *dmenucmd[] = { "/home/jan/.config/rofi/launchers/type-6/launcher.sh", NULL };
-static const char *termcmd[]  = { "alacritty", NULL };
+static const char *termcmd[]  = { "kitty", NULL };
 static const char *codeditorcmd[]  = { "emacsclient", "--create-frame", NULL };
 static const char *i3lockcmd[]  = { "zsh", "-c", "i3lock -c '#000000'", NULL };
 
