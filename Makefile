@@ -3,13 +3,17 @@
 
 include config.mk
 
+INC = drw.h util.h config.h config.def.h
 SRC = drw.c dwm.c util.c
 OBJ = ${SRC:.c=.o}
 
 all: dwm
 
-.c.o:
-	clang-format -i $<
+format: .clang-format
+	clang-format -i ${SRC} ${INC}
+
+%.o: %.c
+	clang-format -i $< 
 	${CC} -c ${CFLAGS} $<
 
 ${OBJ}: config.h config.mk
@@ -43,4 +47,4 @@ uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/dwm\
 		${DESTDIR}${MANPREFIX}/man1/dwm.1
 
-.PHONY: all clean dist install uninstall
+.PHONY: all clean dist install uninstall format
