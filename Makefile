@@ -9,6 +9,7 @@ OBJ = ${SRC:.c=.o}
 all: dwm
 
 .c.o:
+	clang-format -i $<
 	${CC} -c ${CFLAGS} $<
 
 ${OBJ}: config.h config.mk
