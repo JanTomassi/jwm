@@ -199,6 +199,78 @@ void drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h,
     XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w - 1, h - 1);
 }
 
+/* if not for rendering set w to max size to not consider the ellipsis size
+ * else paint background color for text and shift text to the left */
+__attribute_const__ static XftDraw *drw_text_init_render(
+    const Drw *drw, int *x, const int y, unsigned int *w, const unsigned int h,
+    const unsigned int lpad, const short render, const short invert) {
+  if (!render) {
+    *w = invert ? invert : ~invert;
+    return NULL;
+  } else {
+    XSetForeground(drw->dpy, drw->gc,
+                   drw->scheme[invert ? ColFg : ColBg].pixel);
+    XFillRectangle(drw->dpy, drw->drawable, drw->gc, *x, y, *w, h);
+    *x += lpad;
+    *w -= lpad;
+
+    return XftDrawCreate(drw->dpy, drw->drawable,
+                         DefaultVisual(drw->dpy, drw->screen),
+                         DefaultColormap(drw->dpy, drw->screen));
+  }
+}
+
+static inline __attribute_pure__ Fnt *drw_text_findvalid_font(
+    Drw *drw, const long utf8codepoint, int *const charexists) {
+  Fnt *curfont = drw->fonts;
+
+  for (; curfont; curfont = curfont->next) {
+    *charexists =
+        charexists || XftCharExists(drw->dpy, curfont->xfont, utf8codepoint);
+    if (*charexists) return curfont;
+  }
+
+  return NULL;
+}
+
+static inline void drw_text_clc_w(
+    Drw *drw, const char **text, int *const charexists, const short utf8charlen,
+    const long utf8codepoint, int *const utf8strlen, unsigned int *const ew,
+    int *const ellipsis_x, unsigned int *const ellipsis_w,
+    unsigned int *const ellipsis_len, const unsigned int ellipsis_width,
+    int *const x, const unsigned int w, int *const overflow, const int render,
+    const Fnt *const usedfont, const Fnt *nextfont) {
+  unsigned int tmpw;
+
+  Fnt *curfont = drw_text_findvalid_font(drw, utf8codepoint, charexists);
+  if (curfont == NULL) return;
+
+  drw_font_getexts(curfont, *text, utf8charlen, &tmpw, NULL);
+  if (*ew + ellipsis_width <= w) {
+    /* keep track where the ellipsis still fits */
+    *ellipsis_x   = *x + *ew;
+    *ellipsis_w   = w - *ew;
+    *ellipsis_len = *utf8strlen;
+  }
+
+  if (*ew + tmpw > w) {
+    *overflow = 1;
+    /* called from drw_fontset_getwidth_clamp():
+     * it wants the width AFTER the overflow
+     */
+    if (!render)
+      *x += tmpw;
+    else
+      *utf8strlen = *ellipsis_len;
+  } else if (curfont == usedfont) {
+    *utf8strlen += utf8charlen; /* byte size of the string */
+    *text += utf8charlen;       /* next utf8 char */
+    *ew += tmpw;                /* increase ending width */
+  } else {
+    nextfont = curfont;
+  }
+}
+
 int drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h,
              unsigned int lpad, const char *text, int invert) {
   int          i, ty, ellipsis_x    = 0;
@@ -220,71 +292,29 @@ int drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h,
     unsigned int idx;
   } nomatches;
   static unsigned int ellipsis_width = 0;
+  if (!ellipsis_width && render) /* Lazy init ellipsis_width */
+    ellipsis_width = drw_fontset_getwidth(drw, "...");
 
   /* Quit if the args are not correct */
   if (!drw || (render && (!drw->scheme || !w)) || !text || !drw->fonts)
     return 0;
-
-  /* if not for rendering set w to max size to not consider the ellipsis size
-   * else paint background color for text and shift text to the left */
-  if (!render) {
-    w = invert ? invert : ~invert;
-  } else {
-    XSetForeground(drw->dpy, drw->gc,
-                   drw->scheme[invert ? ColFg : ColBg].pixel);
-    XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
-    d = XftDrawCreate(drw->dpy, drw->drawable,
-                      DefaultVisual(drw->dpy, drw->screen),
-                      DefaultColormap(drw->dpy, drw->screen));
-    x += lpad;
-    w -= lpad;
-  }
+  /* Setup render env */
+  d = drw_text_init_render(drw, &x, y, &w, h, lpad, render, invert);
 
   usedfont = drw->fonts;
-  /* Init static variable that will be calculated only once this is the size in
-   * pixel of the char ... with the current font */
-  if (!ellipsis_width && render)
-    ellipsis_width = drw_fontset_getwidth(drw, "...");
-  /*  */
   while (1) {
     ew           = 0;    /* ending width */
     ellipsis_len = 0;    /* byte there the ellipsis char still fits */
     utf8strlen   = 0;    /* size in byte of the utf8 string */
     utf8str      = text; /* utf8 string size */
-    nextfont     = NULL; /*  */
+    nextfont     = NULL; /* nextfont in the list */
     while (*text) {
       utf8charlen = utf8decode(text, &utf8codepoint, UTF_SIZ);
-      for (curfont = drw->fonts; curfont; curfont = curfont->next) {
-        charexists = charexists ||
-                     XftCharExists(drw->dpy, curfont->xfont, utf8codepoint);
-        if (charexists) {
-          drw_font_getexts(curfont, text, utf8charlen, &tmpw, NULL);
-          if (ew + ellipsis_width <= w) {
-            /* keep track where the ellipsis still fits */
-            ellipsis_x   = x + ew;
-            ellipsis_w   = w - ew;
-            ellipsis_len = utf8strlen;
-          }
 
-          if (ew + tmpw > w) {
-            overflow = 1;
-            /* called from drw_fontset_getwidth_clamp():
-             * it wants the width AFTER the overflow
-             */
-            if (!render)
-              x += tmpw;
-            else
-              utf8strlen = ellipsis_len;
-          } else if (curfont == usedfont) {
-            utf8strlen += utf8charlen; /* byte size of the string */
-            text += utf8charlen;       /* next utf8 char */
-            ew += tmpw;                /* increase ending width */
-          } else {
-            nextfont = curfont;
-          }
-          break;
-        }
-      }
+      drw_text_clc_w(drw, &text, &charexists, utf8charlen, utf8codepoint,
+                     &utf8strlen, &ew, &ellipsis_x, &ellipsis_w, &ellipsis_len,
+                     ellipsis_width, &x, w, &overflow, render, usedfont,
+                     nextfont);
 
       if (overflow || !charexists || nextfont)
         break;

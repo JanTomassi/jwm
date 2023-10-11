@@ -287,6 +287,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [UnmapNotify]      = unmapnotify};
 static Atom     wmatom[WMLast], netatom[NetLast];
 static int      running = 1;
+static int      reboot  = 0;
 static Cur     *cursor[CurLast];
 static Clr    **scheme;
 static Display *dpy;
@@ -612,13 +613,14 @@ Monitor *createmon(void) {
   Monitor *m;
 
   m            = ecalloc(1, sizeof(Monitor));
-  m->tagset[0] = m->tagset[1] = 1;
-  m->mfact                    = mfact;
-  m->nmaster                  = nmaster;
-  m->showbar                  = showbar;
-  m->topbar                   = topbar;
-  m->lt[0]                    = &layouts[0];
-  m->lt[1]                    = &layouts[1 % LENGTH(layouts)];
+  m->tagset[0] = 1;
+  m->tagset[1] = 1;
+  m->mfact     = mfact;
+  m->nmaster   = nmaster;
+  m->showbar   = showbar;
+  m->topbar    = topbar;
+  m->lt[0]     = &layouts[0];
+  m->lt[1]     = &layouts[1 % LENGTH(layouts)];
   strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
   return m;
 }
@@ -1154,7 +1156,10 @@ void propertynotify(XEvent *e) {
   }
 }
 
-void quit(const Arg *arg) { running = 0; }
+void quit(const Arg *arg) {
+  running = 0;
+  if (arg->i) reboot = 1;
+}
 
 Monitor *recttomon(int x, int y, int w, int h) {
   Monitor *m, *r   = selmon;
@@ -1943,6 +1948,7 @@ int main(int argc, char *argv[]) {
   scan();
   run();
   cleanup();
+  if (reboot) execv(argv[0], &argv[0]);
   XCloseDisplay(dpy);
   return EXIT_SUCCESS;
 }
