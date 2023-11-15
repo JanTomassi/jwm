@@ -66,7 +66,7 @@ static char dmenumon[2] =
     "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = {
     "/home/jan/.config/rofi/launchers/type-6/launcher.sh", NULL};
-static const char *termcmd[]      = {"kitty", NULL};
+static const char *termcmd[]      = {"alacritty", NULL};
 static const char *codeditorcmd[] = {"emacsclient", "--create-frame", NULL};
 static const char *i3lockcmd[]    = {"zsh", "-c", "i3lock -c '#000000'", NULL};
 
