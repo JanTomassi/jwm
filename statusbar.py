@@ -97,43 +97,12 @@ def get_battery():
         return f"{res[:-1]} batt"
 
 
-# def get_bluetooth_device() -> bool:
-#     device_found = lookup_name("AC:3E:B1:73:1B:6A")
-#     return device_found is not None
-
-
-# def lock_if_no_dev():
-#     subprocess.run(["i3lock", "-c", b"000000"])
-
-
-# def unlock_if_near():
-#     subprocess.run(["pkill", "i3lock"])
-
-
-# def manage_bluetooth_locking() -> str:
-#     global is_locking
-
-#     is_device = get_bluetooth_device()
-
-#     if is_device:
-#         is_locking = 0
-#         return " 󰄜"
-
-#     elif not (is_device) and (is_locking == 4):
-#         is_locking += 1
-#         lock_if_no_dev()
-#         return " 󰥐"
-
-#     elif not (is_device) and (is_locking >= 2) and (is_locking < 4):
-#         is_locking += 1
-#         subprocess.run(["notify-send", "Phone not found for %d" % is_locking])
-#         return " 󰥐"
-#     else:
-#         return " 󰥐"
-
 def update_root_window():
     global str_module
+    
     with mutex:
+        if str_module is None:
+            str_module = [""]*5
         subprocess.run(["xsetroot", "-name", " | ".join(str_module)])
 
 
