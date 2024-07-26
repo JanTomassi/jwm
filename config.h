@@ -1,5 +1,17 @@
 /* See LICENSE file for copyright and license details. */
 
+#define cardinal_pink_50  "#fdf2fb"
+#define cardinal_pink_100 "#fde6f9"
+#define cardinal_pink_200 "#fccef3"
+#define cardinal_pink_300 "#fba6e9"
+#define cardinal_pink_400 "#f76fd8"
+#define cardinal_pink_500 "#f044c4"
+#define cardinal_pink_600 "#e022a5"
+#define cardinal_pink_700 "#c21487"
+#define cardinal_pink_800 "#a1136f"
+#define cardinal_pink_900 "#85155e"
+#define cardinal_pink_950 "#520537"
+
 /* appearance */
 static const unsigned int borderpx    = 1;  /* border pixel of windows */
 static const unsigned int snap        = 32; /* snap pixel */
@@ -7,29 +19,34 @@ static const int          showbar     = 1;  /* 0 means no bar */
 static const int          topbar      = 1;  /* 0 means bottom bar */
 static const char        *fonts[]     = {"monospace:size=10"};
 static const char         dmenufont[] = "monospace:size=10";
-static const char         col_gray1[] = "#85155E";
-static const char         col_gray2[] = "#CC70AC";
-static const char         col_gray3[] = "#FFFFFF";
-static const char         col_gray4[] = "#000000";
-static const char         col_cyan[]  = "#F47DBB";
-static const char        *colors[][3] = {
-  /*               fg         bg         border   */
-    [SchemeNorm] = {col_gray3, col_gray1, col_gray4},
-    [SchemeSel]  = {col_gray4, col_cyan,  col_cyan },
+
+static const char col_gray1[] = cardinal_pink_100;
+static const char col_gray2[] = cardinal_pink_900;
+static const char col_gray3[] = cardinal_pink_200;
+static const char col_gray4[] = cardinal_pink_950;
+
+static const char col_sel[]   = cardinal_pink_400;
+static const char col_black[] = "#000000";
+
+static const char *colors[][3] = {
+    /*               fg         bg         border   */
+    [SchemeNorm] = {col_gray1, col_gray2, col_black},
+    [SchemeSel]  = {col_gray3, col_gray4, col_sel  },
 };
 
 /* tagging */
 static const char *tags[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
 static const Rule rules[] = {
-  /* xprop(1):
-  *	WM_CLASS(STRING) = instance, class
-  *	WM_NAME(STRING) = title
-  */
-  /* class  instance title tags mask isfloating   monitor */
-    {"Gimp",    NULL, NULL, 0,                1,      -1},
-    {"Firefox", NULL, NULL, 1 << 8,           0,      -1},
-    {NULL, NULL, "Picture in picture", 1 << 8, 1, -1},
+    /* xprop(1):
+     *	WM_CLASS(STRING) = instance, class
+     *	WM_NAME(STRING) = title
+     */
+    /* class  instance title tags mask isfloating   monitor */
+    {"Gimp",    NULL, NULL,                 0,      1, -1},
+    {"Firefox", NULL, NULL,                 1 << 8, 0, -1},
+    {NULL,      NULL, "Picture in picture", 0,      1, -1},
+    {NULL,      NULL, "Ediff",              0,      1, -1},
 };
 
 /* layout(s) */
@@ -41,7 +58,7 @@ static const int lockfullscreen =
     1; /* 1 will force focus on the fullscreen window */
 
 static const Layout layouts[] = {
-  /* symbol arrange function */
+    /* symbol arrange function */
     {"[]=", tile   }, /* first entry is default */
     {"><>", NULL   }, /* no layout function means floating behavior */
     {"[M]", monocle},
@@ -49,18 +66,18 @@ static const Layout layouts[] = {
 
 /* key definitions */
 #define MODKEY Mod4Mask
-#define TAGKEYS(KEY, TAG)                                                \
-  {MODKEY, KEY, view, {.ui = 1 << TAG}},                                 \
-      {MODKEY | ControlMask, KEY, toggleview, {.ui = 1 << TAG}},         \
-      {MODKEY | ShiftMask, KEY, tag, {.ui = 1 << TAG}}, {                \
-    MODKEY | ControlMask | ShiftMask, KEY, toggletag, { .ui = 1 << TAG } \
-  }
+#define TAGKEYS(KEY, TAG)                                                    \
+    {MODKEY, KEY, view, {.ui = 1 << TAG}},                                   \
+        {MODKEY | ControlMask, KEY, toggleview, {.ui = 1 << TAG}},           \
+        {MODKEY | ShiftMask, KEY, tag, {.ui = 1 << TAG}}, {                  \
+        MODKEY | ControlMask | ShiftMask, KEY, toggletag, { .ui = 1 << TAG } \
+    }
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd)                                       \
-  {                                                      \
-    .v = (const char *[]) { "/bin/sh", "-c", cmd, NULL } \
-  }
+#define SHCMD(cmd)                                           \
+    {                                                        \
+        .v = (const char *[]) { "/bin/sh", "-c", cmd, NULL } \
+    }
 
 /* commands */
 static char dmenumon[2] =
@@ -72,7 +89,7 @@ static const char *codeditorcmd[] = {"emacsclient", "--create-frame", NULL};
 static const char *i3lockcmd[]    = {"zsh", "-c", "i3lock -c '#000000'", NULL};
 
 static const Key keys[] = {
-  /* modifier                     key        function        argument */
+    /* modifier                     key        function        argument */
     {MODKEY,             XK_p,      spawn,          {.v = dmenucmd}    },
     {MODKEY | ShiftMask, XK_Return, spawn,          {.v = termcmd}     },
     {MODKEY | ShiftMask, XK_o,      spawn,          {.v = codeditorcmd}},
@@ -114,7 +131,7 @@ static const Key keys[] = {
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
  * ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
-  /* click       event mask  button  function        argument */
+    /* click       event mask  button  function        argument */
     {ClkLtSymbol,   0,      Button1, setlayout,      {0}               },
     {ClkLtSymbol,   0,      Button3, setlayout,      {.v = &layouts[2]}},
     {ClkWinTitle,   0,      Button2, zoom,           {0}               },
