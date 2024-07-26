@@ -3,3 +3,4 @@ dwm.o
 drw.o
 util.o
 cscope.out
+statusbar
