@@ -40,6 +40,7 @@
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
 #include <X11/Xft/Xft.h>
+#include <math.h>
 
 #include "drw.h"
 #include "util.h"
@@ -202,6 +203,7 @@ static long     getstate(Window w);
 static int      gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void     grabbuttons(Client *c, int focused);
 static void     grabkeys(void);
+static void     grid(Monitor *m);
 static void     incnmaster(const Arg *arg);
 static void     keypress(XEvent *e);
 static void     killclient(const Arg *arg);
@@ -256,6 +258,7 @@ static void     updatewmhints(Client *c);
 static void     view(const Arg *arg);
 static Client  *wintoclient(Window w);
 static Monitor *wintomon(Window w);
+static void     winview(const Arg *arg);
 static int      xerror(Display *dpy, XErrorEvent *ee);
 static int      xerrordummy(Display *dpy, XErrorEvent *ee);
 static int      xerrorstart(Display *dpy, XErrorEvent *ee);
@@ -907,6 +910,34 @@ void grabkeys(void) {
                         XGrabKey(dpy, k, keys[i].mod | modifiers[j], root, True,
                                  GrabModeAsync, GrabModeAsync);
         XFree(syms);
+    }
+}
+
+void grid(Monitor *m) {
+    unsigned int i, n, cx, cy, cw, ch, aw, ah, cols, rows;
+    Client      *c;
+
+    for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next)) n++;
+
+    /* grid dimensions */
+    if (n == 0)
+        cols = 1;
+    else if (n < 4)
+        cols = floor(n / 2.0f + 1);
+    else
+        cols = ceil(sqrt(n));
+    rows = (cols - 1) * cols >= n ? cols - 1 : cols;
+
+    /* window geoms (cell height/width) */
+    ch = m->wh / (rows ? rows : 1);
+    cw = m->ww / (cols ? cols : 1);
+    for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+        cx = m->wx + (i / rows) * cw;
+        cy = m->wy + (i % rows) * ch;
+        /* adjust height/width of last row/column's windows */
+        ah = ((i + 1) % rows == 0) ? m->wh - ch * rows : 0;
+        aw = (i >= rows * (cols - 1)) ? m->ww - cw * cols : 0;
+        resize(c, cx, cy, cw - 2 * c->bw + aw, ch - 2 * c->bw + ah, False);
     }
 }
 
@@ -1896,6 +1927,25 @@ Monitor *wintomon(Window w) {
         if (w == m->barwin) return m;
     if ((c = wintoclient(w))) return c->mon;
     return selmon;
+}
+
+/* Selects for the view of the focused window. The list of tags */
+/* to be displayed is matched to the focused window tag list. */
+void winview(const Arg *arg) {
+    Window   win, win_r, win_p, *win_c;
+    unsigned nc;
+    int      unused;
+    Client  *c;
+    Arg      a;
+
+    if (!XGetInputFocus(dpy, &win, &unused)) return;
+    while (XQueryTree(dpy, win, &win_r, &win_p, &win_c, &nc) && win_p != win_r)
+        win = win_p;
+
+    if (!(c = wintoclient(win))) return;
+
+    a.ui = c->tags;
+    view(&a);
 }
 
 /* There's no way to check accesses to destroyed windows, thus those cases are
