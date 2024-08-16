@@ -1,37 +1,23 @@
 /* See LICENSE file for copyright and license details. */
 
-#define cardinal_pink_50  "#fdf2fb"
-#define cardinal_pink_100 "#fde6f9"
-#define cardinal_pink_200 "#fccef3"
-#define cardinal_pink_300 "#fba6e9"
-#define cardinal_pink_400 "#f76fd8"
-#define cardinal_pink_500 "#f044c4"
-#define cardinal_pink_600 "#e022a5"
-#define cardinal_pink_700 "#c21487"
-#define cardinal_pink_800 "#a1136f"
-#define cardinal_pink_900 "#85155e"
-#define cardinal_pink_950 "#520537"
+static const char PRIMARY_1[] = "#05161D";
+static const char PRIMARY_2[] = "#1C2E3F";
+static const char PRIMARY_3[] = "#8E4B6A";
+static const char PRIMARY_4[] = "#E48699";
+static const char PRIMARY_5[] = "#CE91B8";
 
 /* appearance */
-static const unsigned int borderpx    = 1;  /* border pixel of windows */
+static const unsigned int borderpx    = 2;  /* border pixel of windows */
 static const unsigned int snap        = 32; /* snap pixel */
 static const int          showbar     = 1;  /* 0 means no bar */
 static const int          topbar      = 1;  /* 0 means bottom bar */
 static const char        *fonts[]     = {"monospace:size=10"};
 static const char         dmenufont[] = "monospace:size=10";
 
-static const char col_gray1[] = cardinal_pink_100;
-static const char col_gray2[] = cardinal_pink_900;
-static const char col_gray3[] = cardinal_pink_200;
-static const char col_gray4[] = cardinal_pink_950;
-
-static const char col_sel[]   = cardinal_pink_400;
-static const char col_black[] = "#000000";
-
 static const char *colors[][3] = {
     /*               fg         bg         border   */
-    [SchemeNorm] = {col_gray1, col_gray2, col_black},
-    [SchemeSel]  = {col_gray3, col_gray4, col_sel  },
+    [SchemeSel]  = {PRIMARY_4, PRIMARY_2, PRIMARY_5},
+    [SchemeNorm] = {PRIMARY_3, PRIMARY_1, PRIMARY_1},
 };
 
 /* tagging */
