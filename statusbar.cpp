@@ -79,7 +79,7 @@ static std::string update_bar() {
   waitpid(pid, NULL, 0);
 
   return res.str();
-};
+}
 
 static void job_fun(size_t barI, std::chrono::milliseconds to, callbackFn fn) {
   while (running) {
