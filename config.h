@@ -1,10 +1,10 @@
 /* See LICENSE file for copyright and license details. */
 
-static const char PRIMARY_1[] = "#05161D";
-static const char PRIMARY_2[] = "#1C2E3F";
-static const char PRIMARY_3[] = "#8E4B6A";
-static const char PRIMARY_4[] = "#E48699";
-static const char PRIMARY_5[] = "#CE91B8";
+static const char fg_223[] = "#ebdbb2";
+static const char bg_235[] = "#282828";
+static const char gr_245[] = "#928374";
+static const char gr_246[] = "#a89984";
+static const char og_166[] = "#d65d0e";
 
 /* appearance */
 static const unsigned int borderpx    = 2;  /* border pixel of windows */
@@ -15,9 +15,9 @@ static const char        *fonts[]     = {"monospace:size=10"};
 static const char         dmenufont[] = "monospace:size=10";
 
 static const char *colors[][3] = {
-    /*               fg         bg         border   */
-    [SchemeSel]  = {PRIMARY_4, PRIMARY_2, PRIMARY_5},
-    [SchemeNorm] = {PRIMARY_3, PRIMARY_1, PRIMARY_1},
+    /*              fg      bg      border   */
+    [SchemeSel]  = {og_166, bg_235, og_166},
+    [SchemeNorm] = {gr_245, bg_235, gr_245},
 };
 
 /* tagging */
@@ -71,7 +71,7 @@ static char dmenumon[2] =
     "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *launcer[] = {
     "/home/jan/.config/rofi/launchers/type-6/launcher.sh", NULL};
-static const char *terminal[]      = {"alacritty", NULL};
+static const char *terminal[]      = {"kitty", NULL};
 static const char *code_editor[] = {"env", "XCURSOR_SIZE=8", "emacsclient", "--create-frame", NULL};
 static const char *lock_session[]    = {"loginctl", "lock-session", NULL};
 
