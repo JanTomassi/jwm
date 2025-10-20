@@ -13,7 +13,7 @@ format: .clang-format
 	clang-format -i ${SRC} ${INC}
 
 %.o: %.c
-	clang-format -i $< 
+	# clang-format -i $< 
 	${CC} -c ${CFLAGS} $<
 
 ${OBJ}: config.h config.mk
@@ -23,6 +23,9 @@ config.h:
 
 dwm: ${OBJ}
 	${CC} -o $@ ${OBJ} ${LDFLAGS}
+
+stock: test_stock.cpp
+	${CXX} -l jsoncpp -l curl -o $@ $< 
 
 clean:
 	rm -f dwm ${OBJ} dwm-${VERSION}.tar.gz

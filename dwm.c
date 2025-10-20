@@ -213,6 +213,7 @@ static void     maprequest(XEvent *e);
 static void     monocle(Monitor *m);
 static void     motionnotify(XEvent *e);
 static void     movemouse(const Arg *arg);
+static void     moveclienttonextmon(const Arg* arg);
 static Client  *nexttiled(Client *c);
 static void     pop(Client *c);
 static void     propertynotify(XEvent *e);
@@ -783,8 +784,24 @@ void focusmon(const Arg *arg) {
     Monitor *m;
 
     if (!mons->next) return;
+
+    Window       root_return, child_return;
+    int          root_x_return, root_y_return;
+    int          win_x_return, win_y_return;
+    unsigned int mask_return;
+    int          pointer_query = XQueryPointer(
+        dpy, selmon->barwin, &root_return, &child_return, &root_x_return,
+        &root_y_return, &win_x_return, &win_y_return, &mask_return);
+
     if ((m = dirtomon(arg->i)) == selmon) return;
     unfocus(selmon->sel, 0);
+    if (pointer_query) {
+        XWarpPointer(dpy, None, m->barwin, 0, 0, 0, 0,
+                     m->mw * (win_x_return / (float)selmon->mw),
+                     m->mh * (win_y_return / (float)selmon->mh));
+    } else {
+        XWarpPointer(dpy, None, m->barwin, 0, 0, 0, 0, m->mw / 2, m->mh / 2);
+    }
     selmon = m;
     focus(NULL);
 }
@@ -805,6 +822,11 @@ void focusstack(const Arg *arg) {
                 if (ISVISIBLE(i)) c = i;
     }
     if (c) {
+	if (move_mouse_between_win){
+    	    XWindowAttributes wa;
+    	    XGetWindowAttributes(dpy, c->win, &wa);
+            XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, wa.width/2, wa.height/2);
+	}
         focus(c);
         restack(selmon);
     }
@@ -1140,6 +1162,37 @@ void movemouse(const Arg *arg) {
         selmon = m;
         focus(NULL);
     }
+}
+void moveclienttonextmon(const Arg* arg){
+	if (mons->next == NULL) return;
+
+	Monitor *m = mons;
+	Monitor *m_next = mons->next;
+	Client *c_list = m->clients;
+
+	while(m_next != NULL){
+		c_list = m_next->clients;
+		m_next->clients = NULL;
+		Client *c = m->clients;
+		while(c != NULL){
+			unfocus(c, 1);
+			detach(c);
+			detachstack(c);
+			c->mon  = m_next;
+			attach(c);
+			attachstack(c);
+			focus(NULL);
+			arrange(NULL);
+			c = c->next;
+		}
+		m = m_next;
+		m_next = m->next;
+	}
+
+	mons->clients = c_list;
+
+	focus(NULL);
+	arrange(NULL);
 }
 
 Client *nexttiled(Client *c) {

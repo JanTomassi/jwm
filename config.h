@@ -42,6 +42,7 @@ static const int   resizehints =
     1; /* 1 means respect size hints in tiled resizals */
 static const int lockfullscreen =
     1; /* 1 will force focus on the fullscreen window */
+static const int move_mouse_between_win = 1;
 
 static const Layout layouts[] = {
     /* symbol arrange function */
@@ -71,7 +72,7 @@ static char dmenumon[2] =
     "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *launcer[] = {
     "/home/jan/.config/rofi/launchers/type-6/launcher.sh", NULL};
-static const char *terminal[]      = {"kitty", NULL};
+static const char *terminal[]      = {"ghostty", NULL};
 static const char *code_editor[] = {"env", "XCURSOR_SIZE=8", "emacsclient", "--create-frame", NULL};
 static const char *lock_session[]    = {"loginctl", "lock-session", NULL};
 
