@@ -10,7 +10,7 @@ OBJ = ${SRC:.c=.o}
 all: dwm
 
 format: .clang-format
-	clang-format -i ${SRC} ${INC}
+	clang-format --style=GNU -i ${SRC} ${INC}
 
 %.o: %.c
 	# clang-format -i $< 
