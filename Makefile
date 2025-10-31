@@ -9,11 +9,10 @@ OBJ = ${SRC:.c=.o}
 
 all: dwm
 
-format: .clang-format
-	clang-format --style=GNU -i ${SRC} ${INC}
+format: .clang-format ${SRC} ${INC}
+	clang-format -i $(filter-out $<, $?)
 
 %.o: %.c
-	# clang-format -i $< 
 	${CC} -c ${CFLAGS} $<
 
 ${OBJ}: config.h config.mk
